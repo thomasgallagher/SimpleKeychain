@@ -73,7 +73,7 @@
     if (!key) {
         return nil;
     }
-    
+
     NSDictionary *query = [self queryFetchOneByKey:key message:message];
     CFTypeRef data = nil;
     OSStatus status = SecItemCopyMatching((__bridge CFDictionaryRef)query, &data);
@@ -83,12 +83,12 @@
         }
         return nil;
     }
-    
+
     NSData *dataFound = [NSData dataWithData:(__bridge NSData *)data];
     if (data) {
         CFRelease(data);
     }
-    
+
     return dataFound;
 }
 
@@ -119,9 +119,9 @@
     if (!key) {
         return NO;
     }
-    
+
     NSDictionary *query = [self queryFindByKey:key message:message];
-    
+
     // Touch ID case
     if (self.useAccessControl && self.defaultAccessiblity == A0SimpleKeychainItemAccessibleWhenPasscodeSetThisDeviceOnly) {
         // TouchId case. Doesn't support updating keychain items
@@ -134,7 +134,7 @@
             return status == errSecSuccess;
         }
     }
-    
+
     // Normal case
     OSStatus status = SecItemCopyMatching((__bridge CFDictionaryRef)query, NULL);
     if (status == errSecSuccess) {
@@ -246,7 +246,7 @@
 }
 
 - (NSString*)stringForSecStatus:(OSStatus)status {
-    
+
     switch(status) {
         case errSecSuccess:
             return NSLocalizedStringFromTable(@"errSecSuccess: No error", @"SimpleKeychain", @"Possible error from keychain. ");
@@ -314,12 +314,16 @@
     if (message) {
         return @{
 #if TARGET_OS_IPHONE
+                 (__bridge id)kSecAttrAccessible: (__bridge id)[self accessibility],
                  (__bridge id)kSecUseOperationPrompt: message,
 #endif
                  (__bridge id)kSecValueData: data,
                  };
     } else {
         return @{
+#if TARGET_OS_IPHONE
+                 (__bridge id)kSecAttrAccessible: (__bridge id)[self accessibility],
+#endif
                  (__bridge id)kSecValueData: data,
                  };
     }
